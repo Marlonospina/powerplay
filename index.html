@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerPlay - Catálogo Digital Gamer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0b0c10',
+                        cardBg: '#13151c',
+                        cardHover: '#1c1f2b',
+                        neonBlue: '#00f0ff',
+                        neonPurple: '#9d4edd',
+                        neonGreen: '#00ff66',
+                        neonPink: '#ff007f',
+                        xboxGreen: '#107c41',
+                        psBlue: '#00439c'
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        rajdhani: ['Rajdhani', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Animación RGB Neón para la barra de búsqueda */
+        @keyframes rgbGlow {
+            0% { border-color: #00f0ff; box-shadow: 0 0 15px rgba(0, 240, 255, 0.4); }
+            33% { border-color: #9d4edd; box-shadow: 0 0 15px rgba(157, 78, 221, 0.4); }
+            66% { border-color: #ff007f; box-shadow: 0 0 15px rgba(255, 0, 127, 0.4); }
+            100% { border-color: #00f0ff; box-shadow: 0 0 15px rgba(0, 240, 255, 0.4); }
+        }
+
+        .rgb-border {
+            border: 2px solid #00f0ff;
+            animation: rgbGlow 6s infinite ease-in-out;
+        }
+
+        .glass-panel {
+            background: rgba(19, 21, 28, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .neon-btn-blue {
+            background: linear-gradient(135deg, #00f0ff 0%, #0072ff 100%);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+        .neon-btn-blue:hover {
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.6);
+        }
+
+        .neon-btn-green {
+            background: linear-gradient(135deg, #00ff66 0%, #00b347 100%);
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.3);
+        }
+        .neon-btn-green:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 102, 0.6);
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0c10;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1c1f2b;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f0ff;
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="bg-darkBg text-gray-200 font-sans min-h-screen flex flex-col antialiased selection:bg-neonBlue selection:text-black">
+
+    <!-- HEADER / NAVEGACIÓN -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20 gap-4">
+                
+                <!-- Logo PowerPlay -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="switchCategory('ps')">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-neonBlue via-neonPurple to-neonPink flex items-center justify-center shadow-lg shadow-neonBlue/20">
+                        <i class="fa-solid fa-gamepad text-xl text-black"></i>
+                    </div>
+                    <div>
+                        <span class="font-orbitron text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-neonBlue via-white to-neonPurple">POWERPLAY</span>
+                        <span class="block text-[10px] font-rajdhani text-gray-400 tracking-widest uppercase font-semibold">Digital Gaming Store</span>
+                    </div>
+                </div>
+
+                <!-- Barra de búsqueda RGB animada -->
+                <div class="flex-1 max-w-md hidden md:block">
+                    <div class="relative">
+                        <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Buscar juego o membresía..." 
+                            class="w-full bg-darkBg text-sm text-white placeholder-gray-500 rounded-full py-2.5 pl-10 pr-4 rgb-border focus:outline-none transition-all duration-300">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-gray-400"></i>
+                    </div>
+                </div>
+
+                <!-- Carrito Flotante -->
+                <button onclick="toggleCartModal()" class="relative p-3 rounded-xl bg-cardBg hover:bg-cardHover border border-gray-800 text-neonBlue hover:text-white transition-all duration-300 group">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-gamepad text-2xl group-hover:scale-110 transition-transform"></i>
+                        <span class="hidden sm:inline font-rajdhani font-bold text-sm tracking-wide">CARRITO</span>
+                    </div>
+                    <span id="cartBadge" class="absolute -top-2 -right-2 bg-neonPink text-white font-bold text-xs w-6 h-6 rounded-full flex items-center justify-center border-2 border-darkBg shadow-md">0</span>
+                </button>
+            </div>
+
+            <!-- Buscador para pantallas móviles -->
+            <div class="pb-3 md:hidden">
+                <div class="relative">
+                    <input type="text" id="searchInputMobile" oninput="handleSearchMobile()" placeholder="Buscar juego..." 
+                        class="w-full bg-darkBg text-xs text-white placeholder-gray-500 rounded-full py-2 pl-9 pr-4 rgb-border focus:outline-none">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400 text-xs"></i>
+                </div>
+            </div>
+
+            <!-- Menú de pestañas -->
+            <nav class="flex space-x-2 sm:space-x-8 border-t border-gray-800/60 overflow-x-auto no-scrollbar">
+                <button id="tab-ps" onclick="switchCategory('ps')" class="py-3 px-3 sm:px-1 font-orbitron text-xs sm:text-sm font-semibold border-b-2 border-neonBlue text-neonBlue whitespace-nowrap flex items-center gap-2 transition-all">
+                    <i class="fa-brands fa-playstation text-base"></i> JUEGOS DE PLAYSTATION
+                </button>
+                <button id="tab-xbox" onclick="switchCategory('xbox')" class="py-3 px-3 sm:px-1 font-orbitron text-xs sm:text-sm font-semibold border-b-2 border-transparent text-gray-400 hover:text-white whitespace-nowrap flex items-center gap-2 transition-all">
+                    <i class="fa-brands fa-xbox text-base"></i> JUEGOS DE XBOX
+                </button>
+                <button id="tab-memberships" onclick="switchCategory('memberships')" class="py-3 px-3 sm:px-1 font-orbitron text-xs sm:text-sm font-semibold border-b-2 border-transparent text-gray-400 hover:text-white whitespace-nowrap flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-gem text-base"></i> MEMBRESÍAS
+                </button>
+                <button id="tab-streaming" onclick="switchCategory('streaming')" class="py-3 px-3 sm:px-1 font-orbitron text-xs sm:text-sm font-semibold border-b-2 border-transparent text-gray-400 hover:text-white whitespace-nowrap flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-tv text-base"></i> CUENTAS STREAMING Y MÁS
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        
+        <!-- BANNERS -->
+        <div id="banner-xbox" class="hidden mb-6 p-4 rounded-2xl bg-gradient-to-r from-xboxGreen/20 via-cardBg to-darkBg border border-xboxGreen/40 flex items-start gap-4 shadow-lg shadow-xboxGreen/10">
+            <div class="p-3 bg-xboxGreen/20 rounded-xl text-neonGreen">
+                <i class="fa-solid fa-key text-2xl"></i>
+            </div>
+            <div>
+                <h4 class="font-orbitron font-bold text-neonGreen text-sm sm:text-base mb-1">CLAVES OFICIALES 25 DIGITOS XBOX</h4>
+                <p class="text-xs sm:text-sm text-gray-300 leading-relaxed">
+                    Todos nuestros juegos de Xbox son 100% originales. Te entregamos un código digital de 25 dígitos para canjear directamente en tu cuenta personal.
+                </p>
+            </div>
+        </div>
+
+        <div id="banner-memberships" class="hidden mb-6 p-4 rounded-2xl bg-gradient-to-r from-neonPurple/20 via-cardBg to-darkBg border border-neonPurple/40 flex items-start gap-4 shadow-lg shadow-neonPurple/10">
+            <div class="p-3 bg-neonPurple/20 rounded-xl text-neonPurple">
+                <i class="fa-solid fa-crown text-2xl"></i>
+            </div>
+            <div>
+                <h4 class="font-orbitron font-bold text-neonPurple text-sm sm:text-base mb-1">MEMBRESÍAS PLAYSTATION PLUS DELUXE</h4>
+                <p class="text-xs sm:text-sm text-gray-300 leading-relaxed">
+                    Entregadas en formato Cuenta para activar el catálogo completo en tu consola PS4 o PS5.
+                </p>
+            </div>
+        </div>
+
+        <div id="banner-streaming" class="hidden mb-6 p-4 rounded-2xl bg-gradient-to-r from-neonPink/20 via-cardBg to-darkBg border border-neonPink/40 flex items-start gap-4 shadow-lg shadow-neonPink/10">
+            <div class="p-3 bg-neonPink/20 rounded-xl text-neonPink">
+                <i class="fa-solid fa-tv text-2xl"></i>
+            </div>
+            <div>
+                <h4 class="font-orbitron font-bold text-neonPink text-sm sm:text-base mb-1">CUENTAS STREAMING Y PANTALLAS</h4>
+                <p class="text-xs sm:text-sm text-gray-300 leading-relaxed">
+                    Disfruta de entretenimiento digital en tus plataformas favoritas. Pantallas y cuentas mensuales totalmente estables.
+                </p>
+            </div>
+        </div>
+
+        <!-- GRID DE PRODUCTOS -->
+        <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"></div>
+
+        <!-- MENSAJE SIN RESULTADOS -->
+        <div id="noResults" class="hidden py-16 text-center">
+            <i class="fa-solid fa-ghost text-5xl text-gray-600 mb-4 animate-bounce"></i>
+            <h3 class="font-orbitron text-lg font-bold text-gray-400">No encontramos ningún producto</h3>
+            <p class="text-sm text-gray-500 mt-1">Prueba realizando una nueva búsqueda.</p>
+        </div>
+
+        <!-- PAGINACIÓN -->
+        <div id="pagination" class="mt-10 flex items-center justify-center gap-2"></div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="glass-panel border-t border-gray-800/80 mt-12 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center sm:flex sm:justify-between sm:items-center">
+            <div class="mb-4 sm:mb-0 text-left">
+                <span class="font-orbitron text-lg font-bold text-white">POWERPLAY</span>
+                <p class="text-xs text-gray-400 mt-0.5">Tienda líder de juegos digitales & membresías en Colombia.</p>
+            </div>
+            <div class="flex justify-center items-center gap-4 text-xs text-gray-400">
+                <a href="https://wa.me/573115825855" target="_blank" class="hover:text-neonGreen transition-colors flex items-center gap-1.5 bg-darkBg px-4 py-2 rounded-xl border border-gray-800">
+                    <i class="fa-brands fa-whatsapp text-base text-neonGreen"></i> Soporte WhatsApp: +57 311 582 5855
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL CARRITO -->
+    <div id="cartModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex justify-end">
+        <div class="bg-cardBg w-full max-w-md h-full flex flex-col border-l border-gray-800 shadow-2xl">
+            <div class="p-5 border-b border-gray-800 flex items-center justify-between glass-panel">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-neonBlue/10 text-neonBlue">
+                        <i class="fa-solid fa-gamepad text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-orbitron font-bold text-white text-base">MI PEDIDO POWERPLAY</h3>
+                        <p class="text-[11px] text-gray-400">Revisa tus ítems seleccionados</p>
+                    </div>
+                </div>
+                <button onclick="toggleCartModal()" class="w-8 h-8 rounded-full bg-darkBg border border-gray-700 text-gray-400 hover:text-white flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-5 space-y-4"></div>
+
+            <div class="p-5 border-t border-gray-800 bg-darkBg/90 space-y-4">
+                <div class="flex justify-between items-center font-rajdhani font-bold">
+                    <span class="text-gray-400 text-sm">TOTAL A PAGAR:</span>
+                    <span id="cartTotal" class="text-2xl font-orbitron text-neonGreen">$0 COP</span>
+                </div>
+
+                <button onclick="sendWhatsAppOrder()" class="w-full py-3.5 px-4 rounded-xl neon-btn-green text-black font-orbitron font-bold text-sm tracking-wider flex items-center justify-center gap-2 transition-all">
+                    <i class="fa-brands fa-whatsapp text-xl"></i> HACER PEDIDO POR WHATSAPP
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        const productsData = [
+            // PLAYSTATION
+            {
+                id: 'ps1',
+                category: 'ps',
+                title: '007 First Light',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFJSfa74CPNwcOEHKwIbCeXCTOcxTB137ybGxcwjlVWA&s=10',
+                description: 'Sumérgete en una apasionante historia de espionaje con el agente 007.',
+                trailer: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                options: { ps4: { primary: null, secondary: null }, ps5: { primary: 145000, secondary: 89999 } }
+            },
+            {
+                id: 'ps1_alan',
+                category: 'ps',
+                title: 'Alan Wake Remastered',
+                image: 'https://store-images.s-microsoft.com/image/apps.60313.13664496976908034.5ac85762-1269-4eaf-89c5-a7846817f32b.35e707ac-2e17-438d-859d-929bff7ff711',
+                description: 'El escritor Alan Wake se embarca en una búsqueda desesperada de su esposa desaparecida.',
+                trailer: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                options: { ps4: { primary: 49900, secondary: 30900 }, ps5: { primary: 'out', secondary: 'out' } }
+            },
+            {
+                id: 'ps_alien_iso',
+                category: 'ps',
+                title: 'Alien: Isolation',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSVJF9SbUNsQxEhh4Yt3GQv4br0el1_r0uNh391I2R7w&s=10',
+                description: 'Survival horror en una atmósfera de pavor constante.',
+                trailer: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                options: { ps4: { primary: 'out', secondary: 29900 }, ps5: { primary: 'out', secondary: 29900 } }
+            },
+            {
+                id: 'ps_alien_rogue',
+                category: 'ps',
+                title: 'Alien: Rogue Incursion Evolved Edition',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-12UEtSoCBs3Jg_R4sHuPOpMRhYkJP9jbv4ZgF-fL-Sbb1jiHMRX4zdN9&s=10',
+                description: 'Experiencia inmersiva en el universo Alien.',
+                trailer: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                options: { ps4: { primary: null, secondary: null }, ps5: { primary: 79900, secondary: 'out' } }
+            },
+            {
+                id: 'ps_alone_dark',
+                category: 'ps',
+                title: 'Alone in the Dark',
+                image: 'https://store-images.s-microsoft.com/image/apps.61825.13845063481767551.07a83cbc-7294-4679-adca-011091a78bcc.1ff43376-5dbc-47aa-acc7-2cf7958e43c3',
+                description: 'Regresa a la mansión Derceto en este clásico de terror.',
+                trailer: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                options: { ps4: { primary: null, secondary: null }, ps5: { primary: 80900, secondary: 'out' } }
+            },
+            {
+                id: 'ps_ao_tennis2',
+                category: 'ps',
+                title: 'AO Tennis 2',
+                image: 'https://image.api.playstation.com/vulcan/img/cfn/113077zKmM0_BTrHtajhtubzthq4LowiOJMy-swoapwB0r_w-hc8USTCCPNSCtAMOhfi62XdxEUQx-S4MbYfIEsv1Yo0m0y6.png',
+                description: 'El único juego de tenis diseñado por y para su comunidad.',
+                trailer: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                options: { ps4: { primary: 45000, secondary: 'out' }, ps5: { primary: 45000, secondary: 'out' } }
+            },
+            {
+                id: 'ps_arc_raiders',
+                category: 'ps',
+                title: 'ARC Raiders',
+                image: 'https://image.api.playstation.com/vulcan/ap/rnd/202610/2911/330ecd4da66e479a9814eea7bfdcfd20b15e1b601468db4e.png',
+                description: 'Shooter cooperativo de extracción en tercera persona.',
+                trailer: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                options: { ps4: { primary: null, secondary: null }, ps5: { primary: 79900, secondary: 60000 } }
+            },
+            {
+                id: 'ps_ark_ascended',
+                category: 'ps',
+                title: 'ARK: Survival Ascended',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIpodDXZ8XdXVYuIh3XKpQv6cZiTrUFF8s1MD5rpfLCj-6i9aeKuO32I0&s=10',
+                description: 'ARK reimaginado en Unreal Engine 5.',
+                trailer: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                options: { ps4: { primary: null, secondary: null }, ps5: { primary: 85000, secondary: 59900 } }
+            },
+            {
+                id: 'ps_arma_reforger',
+                category: 'ps',
+                title: 'Arma Reforger',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5r8qKFN1_aNsGZkJQt-Byf0VtWw_wkd0aOw9BKlxdyg&s=10',
+                description: 'Combate militar realista en la Guerra Fría.',
+                trailer: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                options: { ps4: { primary: null, secondary: null }, ps5: { primary: 'out', secondary: 50000 } }
+            },
+            {
+                id: 'ps_ac_blackflag',
+                category: 'ps',
+                title: "Assassin's Creed Black Flag Resynced",
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCRl1dGJgrYyR5_liVOw2FaVYbzaVem6qHvKaL4gQ1DFaczz7Xyus0KwM&s=10',
+                description: 'Domina los mares del Caribe como Edward Kenway.',
+                trailer: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                options: { ps4: { primary: null, secondary: null }, ps5: { primary: 129900, secondary: 79900 } }
+            },
+            {
+                id: 'ps_ac_legendary',
+                category: 'ps',
+                title: "Assassin's Creed Legendary Collection",
+                image: 'https://store-images.s-microsoft.com/image/apps.11304.64526738698251537.edb73639-1760-4436-8c53-3935ff2aab2a.b927bcd9-b9c8-4fcb-8cb1-e24936707fd8?q=90&w=480&h=270',
+                description: 'Colección de seis juegos épicos de la saga.',
+                trailer: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                options: { ps4: { primary: 'out', secondary: 42000 }, ps5: { primary: 69900, secondary: 'out' } }
+            },
+            {
+                id: 'ps_cod_aw',
+                category: 'ps',
+                title: 'Call of Duty®: Advanced Warfare Gold Edition',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSt8Z2Z6kqZvktpjAP8LBYzufAEIEHdWsXTB2MSGX7w_Q&s=10',
+                description: 'Campos de batalla del futuro con exoesqueletos.',
+                trailer: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                options: { ps4: { primary: 55000, secondary: 35000 }, ps5: { primary: 55000, secondary: 35000 } }
+            },
+
+            // XBOX
+            {
+                id: 'xb_arc_raiders',
+                category: 'xbox',
+                title: 'ARC Raiders',
+                image: 'https://image.api.playstation.com/vulcan/ap/rnd/202610/2911/330ecd4da66e479a9814eea7bfdcfd20b15e1b601468db4e.png',
+                description: 'Shooter cooperativo de extracción. Clave digital de 25 dígitos.',
+                price: 95000
+            },
+            {
+                id: 'xb_ac_blackflag',
+                category: 'xbox',
+                title: "Assassin's Creed Black Flag Resynced",
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCRl1dGJgrYyR5_liVOw2FaVYbzaVem6qHvKaL4gQ1DFaczz7Xyus0KwM&s=10',
+                description: 'Aventura pirata en el Caribe. Código oficial de 25 dígitos.',
+                price: 215000
+            },
+            {
+                id: 'xb1',
+                category: 'xbox',
+                title: 'Call of Duty: Modern Warfare',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSd-bkNvFUtBMt4MaNP0GzQP5vK3lctUCn6M8BlOuXVjg&s=10',
+                description: 'Acción bélica táctica. Código oficial de 25 dígitos.',
+                price: 230000
+            },
+
+            // MEMBRESÍAS
+            {
+                id: 'm1',
+                category: 'memberships',
+                title: 'PS Plus Deluxe - 1 Mes (PS4 / PS5)',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQBmQACPN4msy6y5EGJMvqddYmMcazkrVKDhuuBqSPSQ&s=10',
+                description: '30 días de suscripción Deluxe.',
+                price: 42000,
+                platformTag: 'PS4 / PS5'
+            },
+            {
+                id: 'm2',
+                category: 'memberships',
+                title: 'PS Plus Deluxe - 12 Meses (PS5)',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQBmQACPN4msy6y5EGJMvqddYmMcazkrVKDhuuBqSPSQ&s=10',
+                description: '1 año de suscripción Deluxe.',
+                price: 240000,
+                platformTag: 'PS5'
+            },
+
+            // STREAMING
+            { id: 'st1', category: 'streaming', title: 'Netflix Pantalla', image: 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=600&q=80', price: 18000 },
+            { id: 'st2', category: 'streaming', title: 'Disney Pantalla', image: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=600&q=80', price: 8000 },
+            { id: 'st3', category: 'streaming', title: 'Disney ESPN Pantalla', image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80', price: 16000 },
+            { id: 'st4', category: 'streaming', title: 'Vix Premium Pantalla', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYDL41oCZkMqtXkPWlITizO4RnQmBGHhhbGJP-g2GfoQ&s=10', price: 7000 },
+            { id: 'st5', category: 'streaming', title: 'PLEX Pantalla', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRifP38qAXa5RksTTjBluVSlUFk6Ynb7Xf6uoTY5JeaxQ&s=10', price: 9000 },
+            { id: 'st6', category: 'streaming', title: 'Paramount Pantalla', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8dBKoTIGRLlkvX6QhxOF7BA_dv0Dj56os_geROobdJQ&s=10', price: 8000 },
+            { id: 'st7', category: 'streaming', title: 'HBO Max Pantalla', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZczhPmfbF8JVjy6gc0RrcAXxBX7EtIh5EIG4ox3baow&s', price: 9000 },
+            { id: 'st8', category: 'streaming', title: 'Canva Pro Cuenta 1 Mes', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBV3qjGs2wnz7ej-A58iHsG0AeZDlEU5lXSblN8dlz6w&s=10', price: 10000 },
+            { id: 'st9', category: 'streaming', title: 'Cuenta Spotify 1 Mes', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSq5bzBSykcjYD7QCfin81BkQdpcWTDH4TJdFnEiVwMg&s', price: 12500 },
+            { id: 'st10', category: 'streaming', title: 'CapCut Pro 1 Mes Cuenta', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTWXX4KLkRJcpB-gj4D4jR7Au3U-Oc3IrvE2E5kfcVmCQ&s=10', price: 19000 },
+            { id: 'st11', category: 'streaming', title: 'Prime Video Cuenta Completa', image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=600&q=80', price: 13000 },
+            { id: 'st12', category: 'streaming', title: 'DISNEY+ PREMIUM CUENTA COMPLETA (SIN ESPN)', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTvqYGdMfwvwVmYbgzJlBkOs3fdU9Zl1dNf9-8O4VthQg&s=10', price: 23000 }
+        ];
+
+        let currentCategory = 'ps';
+        let currentPage = 1;
+        const itemsPerPage = 15;
+        let searchQuery = '';
+        let cart = [];
+        const selectionState = {};
+
+        function formatCOP(val) {
+            return '$' + val.toLocaleString('es-CO') + ' COP';
+        }
+
+        function switchCategory(cat) {
+            currentCategory = cat;
+            currentPage = 1;
+            document.querySelectorAll('nav button').forEach(b => {
+                b.classList.remove('border-neonBlue', 'text-neonBlue');
+                b.classList.add('border-transparent', 'text-gray-400');
+            });
+            const activeTab = document.getElementById(`tab-${cat}`);
+            if(activeTab) {
+                activeTab.classList.add('border-neonBlue', 'text-neonBlue');
+                activeTab.classList.remove('border-transparent', 'text-gray-400');
+            }
+            document.getElementById('banner-xbox').classList.toggle('hidden', cat !== 'xbox');
+            document.getElementById('banner-memberships').classList.toggle('hidden', cat !== 'memberships');
+            document.getElementById('banner-streaming').classList.toggle('hidden', cat !== 'streaming');
+            renderProducts();
+        }
+
+        function handleSearch() {
+            searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            currentPage = 1;
+            renderProducts();
+        }
+
+        function handleSearchMobile() {
+            searchQuery = document.getElementById('searchInputMobile').value.toLowerCase().trim();
+            currentPage = 1;
+            renderProducts();
+        }
+
+        function selectPlatform(productId, platform) {
+            if(!selectionState[productId]) selectionState[productId] = {};
+            selectionState[productId].platform = platform;
+            const prod = productsData.find(p => p.id === productId);
+            const availAcc = prod.options[platform];
+            if(availAcc.primary !== null) {
+                selectionState[productId].accountType = 'primary';
+            } else if(availAcc.secondary !== null) {
+                selectionState[productId].accountType = 'secondary';
+            } else {
+                selectionState[productId].accountType = null;
+            }
+            updateCardUI(productId);
+        }
+
+        function selectAccountType(productId, accType) {
+            if(!selectionState[productId]) selectionState[productId] = {};
+            selectionState[productId].accountType = accType;
+            updateCardUI(productId);
+        }
+
+        function updateCardUI(productId) {
+            const prod = productsData.find(p => p.id === productId);
+            const state = selectionState[productId];
+            const platform = state.platform;
+            const accType = state.accountType;
+
+            const btnPs4 = document.getElementById(`btn-ps4-${productId}`);
+            const btnPs5 = document.getElementById(`btn-ps5-${productId}`);
+            if(btnPs4) btnPs4.className = `px-2.5 py-1 text-xs rounded-lg font-orbitron font-bold border ${platform === 'ps4' ? 'bg-neonBlue text-black border-neonBlue' : 'bg-darkBg text-gray-400 border-gray-800'}`;
+            if(btnPs5) btnPs5.className = `px-2.5 py-1 text-xs rounded-lg font-orbitron font-bold border ${platform === 'ps5' ? 'bg-neonBlue text-black border-neonBlue' : 'bg-darkBg text-gray-400 border-gray-800'}`;
+
+            const availOptions = prod.options[platform];
+            const btnPrim = document.getElementById(`btn-prim-${productId}`);
+            const btnSec = document.getElementById(`btn-sec-${productId}`);
+
+            if(btnPrim) {
+                const isDis = availOptions.primary === null;
+                btnPrim.disabled = isDis;
+                btnPrim.className = `flex-1 py-1 text-[11px] font-semibold rounded-lg border transition-all ${isDis ? 'opacity-30 border-gray-800 bg-darkBg cursor-not-allowed' : (accType === 'primary' ? 'bg-neonPurple/30 border-neonPurple text-neonPurple' : 'border-gray-800 bg-darkBg text-gray-400')}`;
+            }
+
+            if(btnSec) {
+                const isDis = availOptions.secondary === null;
+                btnSec.disabled = isDis;
+                btnSec.className = `flex-1 py-1 text-[11px] font-semibold rounded-lg border transition-all ${isDis ? 'opacity-30 border-gray-800 bg-darkBg cursor-not-allowed' : (accType === 'secondary' ? 'bg-neonPurple/30 border-neonPurple text-neonPurple' : 'border-gray-800 bg-darkBg text-gray-400')}`;
+            }
+
+            const priceVal = availOptions[accType];
+            const priceElem = document.getElementById(`price-${productId}`);
+            const actionContainer = document.getElementById(`action-container-${productId}`);
+
+            if(priceVal === null || priceVal === undefined) {
+                priceElem.innerHTML = `<span class="text-xs text-red-500 font-semibold">NO DISPONIBLE</span>`;
+                actionContainer.innerHTML = `<button disabled class="w-full py-2 bg-gray-800 text-gray-500 text-xs font-orbitron rounded-xl cursor-not-allowed">NO DISPONIBLE</button>`;
+            } else if(priceVal === 'out') {
+                priceElem.innerHTML = `<span class="text-xs text-yellow-500 font-semibold">SIN STOCK</span>`;
+                const queryText = encodeURIComponent(`Hola, vi en PowerPlay que ${prod.title} (${platform.toUpperCase()} - Cuenta ${accType === 'primary' ? 'Primaria' : 'Secundaria'}) está sin stock, ¿me confirmas disponibilidad?`);
+                actionContainer.innerHTML = `<a href="https://wa.me/573115825855?text=${queryText}" target="_blank" class="w-full py-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/40 text-yellow-400 text-[11px] font-orbitron font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all"><i class="fa-brands fa-whatsapp text-sm"></i> PREGUNTAR POR WHATSAPP</a>`;
+            } else {
+                priceElem.innerHTML = `<span class="text-neonGreen text-lg font-bold font-rajdhani">${formatCOP(priceVal)}</span>`;
+                actionContainer.innerHTML = `<button onclick="addToCart('${productId}')" class="w-full py-2 neon-btn-blue text-black font-orbitron font-bold text-xs rounded-xl flex items-center justify-center gap-2"><i class="fa-solid fa-gamepad"></i> AGREGAR AL CARRITO</button>`;
+            }
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            const noResults = document.getElementById('noResults');
+            grid.innerHTML = '';
+
+            let filtered = productsData.filter(p => p.category === currentCategory);
+            if(searchQuery !== '') {
+                filtered = filtered.filter(p => p.title.toLowerCase().includes(searchQuery));
+            }
+
+            if(filtered.length === 0) {
+                noResults.classList.remove('hidden');
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            } else {
+                noResults.classList.add('hidden');
+            }
+
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            const startIdx = (currentPage - 1) * itemsPerPage;
+            const pageProducts = filtered.slice(startIdx, startIdx + itemsPerPage);
+
+            pageProducts.forEach(prod => {
+                const card = document.createElement('div');
+                card.className = 'bg-cardBg hover:bg-cardHover border border-gray-800/80 hover:border-neonBlue/40 rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 shadow-xl group';
+
+                if(prod.category === 'ps') {
+                    if(!selectionState[prod.id]) {
+                        const defaultPlat = (prod.options.ps5.primary || prod.options.ps5.secondary) ? 'ps5' : 'ps4';
+                        const defaultAcc = prod.options[defaultPlat].primary ? 'primary' : 'secondary';
+                        selectionState[prod.id] = { platform: defaultPlat, accountType: defaultAcc };
+                    }
+
+                    const hasPs4 = prod.options.ps4.primary !== null || prod.options.ps4.secondary !== null;
+                    const hasPs5 = prod.options.ps5.primary !== null || prod.options.ps5.secondary !== null;
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="relative overflow-hidden h-60">
+                                <img src="${prod.image}" alt="${prod.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <div class="absolute top-3 left-3 bg-psBlue/90 backdrop-blur-md px-2.5 py-1 rounded-md text-[10px] font-orbitron font-bold text-white uppercase border border-blue-400/30">PLAYSTATION</div>
+                            </div>
+                            <div class="p-4 space-y-3">
+                                <h3 class="font-orbitron font-bold text-sm text-white line-clamp-1">${prod.title}</h3>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-[10px] text-gray-400 font-orbitron font-semibold">CONSOLA:</span>
+                                    ${hasPs4 ? `<button id="btn-ps4-${prod.id}" onclick="selectPlatform('${prod.id}', 'ps4')">PS4</button>` : ''}
+                                    ${hasPs5 ? `<button id="btn-ps5-${prod.id}" onclick="selectPlatform('${prod.id}', 'ps5')">PS5</button>` : ''}
+                                </div>
+                                <div class="flex gap-2">
+                                    <button id="btn-prim-${prod.id}" onclick="selectAccountType('${prod.id}', 'primary')">PRIMARIA</button>
+                                    <button id="btn-sec-${prod.id}" onclick="selectAccountType('${prod.id}', 'secondary')">SECUNDARIA</button>
+                                </div>
+                                <div id="price-${prod.id}" class="pt-1"></div>
+                            </div>
+                        </div>
+                        <div class="p-4 pt-0 space-y-2">
+                            <div id="action-container-${prod.id}"></div>
+                            <button onclick="openDetailModal('${prod.id}')" class="w-full py-1.5 bg-darkBg hover:bg-gray-800 text-gray-400 hover:text-white border border-gray-800 rounded-xl text-xs font-orbitron transition-colors"><i class="fa-solid fa-circle-info"></i> VER DETALLES</button>
+                        </div>
+                    `;
+                } else if(prod.category === 'xbox') {
+                    card.innerHTML = `
+                        <div>
+                            <div class="relative overflow-hidden h-60">
+                                <img src="${prod.image}" alt="${prod.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <div class="absolute top-3 left-3 bg-xboxGreen/90 backdrop-blur-md px-2.5 py-1 rounded-md text-[10px] font-orbitron font-bold text-white uppercase border border-green-400/30">CLAVE XBOX 25 DÍGITOS</div>
+                            </div>
+                            <div class="p-4 space-y-2">
+                                <h3 class="font-orbitron font-bold text-sm text-white line-clamp-1">${prod.title}</h3>
+                                <div class="text-neonGreen text-lg font-bold font-rajdhani">${formatCOP(prod.price)}</div>
+                            </div>
+                        </div>
+                        <div class="p-4 pt-0 space-y-2">
+                            <button onclick="addToCart('${prod.id}')" class="w-full py-2 neon-btn-blue text-black font-orbitron font-bold text-xs rounded-xl flex items-center justify-center gap-2"><i class="fa-solid fa-gamepad"></i> AGREGAR AL CARRITO</button>
+                            <button onclick="openDetailModal('${prod.id}')" class="w-full py-1.5 bg-darkBg hover:bg-gray-800 text-gray-400 hover:text-white border border-gray-800 rounded-xl text-xs font-orbitron transition-colors"><i class="fa-solid fa-circle-info"></i> VER DETALLES</button>
+                        </div>
+                    `;
+                } else if(prod.category === 'memberships') {
+                    card.innerHTML = `
+                        <div>
+                            <div class="relative overflow-hidden h-60">
+                                <img src="${prod.image}" alt="${prod.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <div class="absolute top-3 left-3 bg-neonPurple/90 backdrop-blur-md px-2.5 py-1 rounded-md text-[10px] font-orbitron font-bold text-white uppercase border border-purple-400/30">${prod.platformTag}</div>
+                            </div>
+                            <div class="p-4 space-y-2">
+                                <h3 class="font-orbitron font-bold text-sm text-white">${prod.title}</h3>
+                                <div class="text-neonGreen text-lg font-bold font-rajdhani">${formatCOP(prod.price)}</div>
+                            </div>
+                        </div>
+                        <div class="p-4 pt-0 space-y-2">
+                            <button onclick="addToCart('${prod.id}')" class="w-full py-2 neon-btn-blue text-black font-orbitron font-bold text-xs rounded-xl flex items-center justify-center gap-2"><i class="fa-solid fa-gamepad"></i> AGREGAR AL CARRITO</button>
+                            <button onclick="openDetailModal('${prod.id}')" class="w-full py-1.5 bg-darkBg hover:bg-gray-800 text-gray-400 hover:text-white border border-gray-800 rounded-xl text-xs font-orbitron transition-colors"><i class="fa-solid fa-circle-info"></i> VER DETALLES</button>
+                        </div>
+                    `;
+                } else if(prod.category === 'streaming') {
+                    card.innerHTML = `
+                        <div>
+                            <div class="relative overflow-hidden h-60">
+                                <img src="${prod.image}" alt="${prod.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <div class="absolute top-3 left-3 bg-neonPink/90 backdrop-blur-md px-2.5 py-1 rounded-md text-[10px] font-orbitron font-bold text-white uppercase border border-pink-400/30">STREAMING</div>
+                            </div>
+                            <div class="p-4 space-y-2">
+                                <h3 class="font-orbitron font-bold text-sm text-white">${prod.title}</h3>
+                                <div class="text-neonGreen text-lg font-bold font-rajdhani">${formatCOP(prod.price)} / mes</div>
+                            </div>
+                        </div>
+                        <div class="p-4 pt-0 space-y-2">
+                            <button onclick="addToCart('${prod.id}')" class="w-full py-2 neon-btn-blue text-black font-orbitron font-bold text-xs rounded-xl flex items-center justify-center gap-2"><i class="fa-solid fa-gamepad"></i> AGREGAR AL CARRITO</button>
+                        </div>
+                    `;
+                }
+
+                grid.appendChild(card);
+                if(prod.category === 'ps') updateCardUI(prod.id);
+            });
+
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            const container = document.getElementById('pagination');
+            container.innerHTML = '';
+            if(totalPages <= 1) return;
+
+            const prevBtn = document.createElement('button');
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.className = `px-3 py-1.5 rounded-lg font-orbitron text-xs border ${currentPage === 1 ? 'border-gray-800 text-gray-600' : 'border-gray-700 text-gray-300 hover:border-neonBlue'}`;
+            prevBtn.innerHTML = `<i class="fa-solid fa-chevron-left"></i>`;
+            prevBtn.onclick = () => { currentPage--; renderProducts(); };
+            container.appendChild(prevBtn);
+
+            for(let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = `px-3.5 py-1.5 rounded-lg font-orbitron text-xs font-bold border ${i === currentPage ? 'bg-neonBlue text-black border-neonBlue' : 'border-gray-800 bg-cardBg text-gray-400 hover:border-gray-600'}`;
+                btn.innerText = i;
+                btn.onclick = () => { currentPage = i; renderProducts(); };
+                container.appendChild(btn);
+            }
+
+            const nextBtn = document.createElement('button');
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.className = `px-3 py-1.5 rounded-lg font-orbitron text-xs border ${currentPage === totalPages ? 'border-gray-800 text-gray-600' : 'border-gray-700 text-gray-300 hover:border-neonBlue'}`;
+            nextBtn.innerHTML = `<i class="fa-solid fa-chevron-right"></i>`;
+            nextBtn.onclick = () => { currentPage++; renderProducts(); };
+            container.appendChild(nextBtn);
+        }
+
+        function addToCart(productId) {
+            const prod = productsData.find(p => p.id === productId);
+
+            if(prod.category === 'ps') {
+                const state = selectionState[productId];
+                const platform = state.platform.toUpperCase();
+                const accType = state.accountType === 'primary' ? 'Cuenta Primaria' : 'Cuenta Secundaria';
+                const price = prod.options[state.platform][state.accountType];
+                cart.push({ cartId: Date.now(), title: prod.title, details: `PlayStation ${platform} - ${accType}`, price: price });
+            } else if(prod.category === 'xbox') {
+                cart.push({ cartId: Date.now(), title: prod.title, details: `Xbox (Clave 25 Dígitos)`, price: prod.price });
+            } else if(prod.category === 'memberships') {
+                cart.push({ cartId: Date.now(), title: prod.title, details: `PS Plus Deluxe (Cuenta)`, price: prod.price });
+            } else if(prod.category === 'streaming') {
+                cart.push({ cartId: Date.now(), title: prod.title, details: `Servicio Streaming (Mensual)`, price: prod.price });
+            }
+
+            updateCartUI();
+            toggleCartModal(true);
+        }
+
+        function removeFromCart(cartId) {
+            cart = cart.filter(item => item.cartId !== cartId);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            document.getElementById('cartBadge').innerText = cart.length;
+            const container = document.getElementById('cartItemsContainer');
+            container.innerHTML = '';
+            let total = 0;
+
+            if(cart.length === 0) {
+                container.innerHTML = `<div class="py-12 text-center text-gray-500 space-y-2"><i class="fa-solid fa-gamepad text-4xl text-gray-700"></i><p class="text-sm font-orbitron">Tu pedido está vacío</p></div>`;
+            } else {
+                cart.forEach(item => {
+                    total += item.price;
+                    const el = document.createElement('div');
+                    el.className = 'p-3 rounded-xl bg-darkBg border border-gray-800 flex items-center justify-between gap-3';
+                    el.innerHTML = `
+                        <div class="flex-1">
+                            <h4 class="font-orbitron text-xs font-bold text-white line-clamp-1">${item.title}</h4>
+                            <span class="text-[11px] text-gray-400 block">${item.details}</span>
+                            <span class="text-neonGreen text-xs font-bold font-rajdhani">${formatCOP(item.price)}</span>
+                        </div>
+                        <button onclick="removeFromCart(${item.cartId})" class="text-gray-500 hover:text-red-400 p-1.5 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                    `;
+                    container.appendChild(el);
+                });
+            }
+            document.getElementById('cartTotal').innerText = formatCOP(total);
+        }
+
+        function toggleCartModal(forceOpen = false) {
+            const modal = document.getElementById('cartModal');
+            if(forceOpen) modal.classList.remove('hidden');
+            else modal.classList.toggle('hidden');
+        }
+
+        function sendWhatsAppOrder() {
+            if(cart.length === 0) return;
+            let msg = `Hola, quiero realizar el siguiente pedido desde PowerPlay:\n\n`;
+            let total = 0;
+            cart.forEach((item, index) => {
+                msg += `${index + 1}. ${item.title} (${item.details}) - ${formatCOP(item.price)}\n`;
+                total += item.price;
+            });
+            msg += `\nTotal a pagar: ${formatCOP(total)}`;
+            window.open(`https://wa.me/573115825855?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        // APERTURA DE DETALLES EN NUEVA PESTAÑA 100% COMPATIBLE Y SEGURA
+        function openDetailModal(productId) {
+            const prod = productsData.find(p => p.id === productId);
+            if (!prod) return;
+
+            let catTitle = "JUEGO DIGITAL";
+            let priceText = "";
+
+            if (prod.category === 'ps') {
+                catTitle = "PLAYSTATION";
+                priceText = "Selecciona tu consola y tipo de cuenta en el catálogo";
+            } else if (prod.category === 'xbox') {
+                catTitle = "CLAVE XBOX 25 DÍGITOS";
+                priceText = formatCOP(prod.price);
+            } else if (prod.category === 'memberships') {
+                catTitle = "MEMBRESÍA PS PLUS DELUXE";
+                priceText = formatCOP(prod.price);
+            }
+
+            const waMsg = encodeURIComponent(`Hola PowerPlay, deseo obtener más información sobre: ${prod.title}`);
+
+            const newWin = window.open('', '_blank');
+            if (!newWin) return;
+
+            const d = newWin.document;
+            d.title = prod.title + ' - Detalles PowerPlay';
+
+            // Estilos
+            const style = d.createElement('style');
+            style.textContent = `
+                body { background-color: #0b0c10; color: #e5e7eb; font-family: sans-serif; margin: 0; padding: 40px 16px; box-sizing: border-box; }
+                .card { max-width: 768px; margin: 0 auto; background-color: #13151c; border: 1px solid #1f2937; border-radius: 24px; padding: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+                .header { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+                .img { width: 192px; height: 256px; object-fit: cover; border-radius: 16px; border: 1px solid #1f2937; }
+                .badge { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; text-transform: uppercase; background: rgba(6,182,212,0.2); color: #22d3ee; border: 1px solid rgba(6,182,212,0.3); margin-bottom: 8px; }
+                .title { font-size: 24px; font-weight: bold; color: #fff; margin: 0 0 12px 0; }
+                .price { font-size: 20px; font-weight: bold; color: #4ade80; margin-bottom: 12px; }
+                .desc { font-size: 13px; color: #d1d5db; line-height: 1.6; margin-bottom: 16px; }
+                .btn-wa { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 12px; background: #22c55e; color: #000; font-weight: bold; font-size: 13px; text-decoration: none; }
+                .info-box { margin-top: 24px; padding: 16px; border-radius: 12px; background: #0b0c10; border: 1px solid #1f2937; font-size: 13px; color: #d1d5db; }
+                .video-box { margin-top: 24px; position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 16px; border: 1px solid #1f2937; }
+                .video-box iframe { position: absolute; top:0; left:0; width:100%; height:100%; border:0; }
+            `;
+            d.head.appendChild(style);
+
+            // Contenedor principal
+            const card = d.createElement('div');
+            card.className = 'card';
+
+            // Contenido de portada e info
+            const header = d.createElement('div');
+            header.className = 'header';
+            header.innerHTML = `
+                <img class="img" src="${prod.image}" alt="${prod.title}">
+                <div style="flex:1; min-width:240px;">
+                    <span class="badge">${catTitle}</span>
+                    <h1 class="title">${prod.title}</h1>
+                    <div class="price">${priceText}</div>
+                    <p class="desc">${prod.description || 'Detalles del producto.'}</p>
+                    <a class="btn-wa" href="https://wa.me/573115825855?text=${waMsg}" target="_blank">CONSULTAR POR WHATSAPP</a>
+                </div>
+            `;
+            card.appendChild(header);
+
+            // Explicación de formato
+            if (prod.category === 'ps') {
+                const info = d.createElement('div');
+                info.className = 'info-box';
+                info.innerHTML = `
+                    <div style="font-weight:bold; color:#22d3ee; margin-bottom:8px;">INFORMACIÓN DEL FORMATO:</div>
+                    <p style="margin:0 0 8px 0;">🔹 <strong>Cuenta Primaria:</strong> Juegas desde tu usuario personal, ganas trofeos en tu cuenta y no requieres conexión permanente.</p>
+                    <p style="margin:0;">🔹 <strong>Cuenta Secundaria:</strong> Juegas desde el usuario entregado y requieres conexión permanente a internet.</p>
+                `;
+                card.appendChild(info);
+            } else if (prod.category === 'xbox') {
+                const info = d.createElement('div');
+                info.className = 'info-box';
+                info.innerHTML = `<p style="margin:0;">🔹 <strong>Clave Digital 100% Original:</strong> Se te proporciona un código único de 25 dígitos para canjear en tu propia cuenta de Xbox.</p>`;
+                card.appendChild(info);
+            }
+
+            // Tráiler
+            if (prod.trailer) {
+                const vBox = d.createElement('div');
+                vBox.className = 'video-box';
+                const iframe = d.createElement('iframe');
+                iframe.src = prod.trailer;
+                iframe.allowFullscreen = true;
+                vBox.appendChild(iframe);
+                card.appendChild(vBox);
+            }
+
+            d.body.appendChild(card);
+        }
+
+        window.onload = function() {
+            switchCategory('ps');
+        };
+    </script>
+</body>
+</html>
